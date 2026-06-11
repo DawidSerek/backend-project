@@ -3,6 +3,8 @@ namespace ApplicationCore.ValueObjects;
 public record PESEL
 {
     public string Value { get; init; }
+    public DateOnly BirthDate { get => PeselDateValidator.Decode(this.Value); }
+    public Gender Gender { get => PeselGenderExtractor.Extract(this.Value); }
 
     private static readonly int[] Weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
 
@@ -32,41 +34,33 @@ public record PESEL
 
 public static class PeselDateValidator
 {
-    public static bool HasValidBirthDate(string pesel)
+    public static DateOnly Decode(string pesel)
     {
         int yearOffset = ((pesel[0] - '0') * 10) + (pesel[1] - '0');
         int monthDigits = ((pesel[2] - '0') * 10) + (pesel[3] - '0');
         int day = ((pesel[4] - '0') * 10) + (pesel[5] - '0');
 
-        int century = monthDigits switch
+        var (century, monthOffset) = monthDigits switch
         {
-            >= 1 and <= 12 => 1900,
-            >= 21 and <= 32 => 2000,
-            >= 41 and <= 52 => 1800,
-            >= 61 and <= 72 => 2100,
-            >= 81 and <= 92 => 2200,
-            _ => -1
+            >= 1 and <= 12  => (1900, 0),
+            >= 21 and <= 32 => (2000, 20),
+            >= 41 and <= 52 => (1800, 40),
+            >= 61 and <= 72 => (2100, 60),
+            >= 81 and <= 92 => (2200, 80),
+            _ => throw new ArgumentException("PESEL month encoding is invalid")
         };
 
-        if (century == -1) return false;
+        return new DateOnly(century + yearOffset, monthDigits - monthOffset, day);
+    }
 
-        int actualYear = century + yearOffset;
-        int actualMonth = monthDigits - (century switch
-        {
-            1900 => 0,
-            2000 => 20,
-            1800 => 40,
-            2100 => 60,
-            2200 => 80,
-            _ => 0
-        });
-
+    public static bool HasValidBirthDate(string pesel)
+    {
         try
         {
-            var verifiedDate = new DateTime(actualYear, actualMonth, day);
+            Decode(pesel);
             return true;
         }
-        catch (ArgumentOutOfRangeException)
+        catch
         {
             return false;
         }
