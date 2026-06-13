@@ -1,36 +1,4 @@
-namespace ApplicationCore.ValueObjects;
-
-public record PESEL
-{
-    public string Value { get; init; }
-    public DateOnly BirthDate { get => PeselDateValidator.Decode(this.Value); }
-    public Gender Gender { get => PeselGenderExtractor.Extract(this.Value); }
-
-    private static readonly int[] Weights = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
-
-    public PESEL(string pesel)
-    {
-        if (pesel.Length != 11)
-            throw new ArgumentException("PESEL must be 11 digits long");
-
-        if (!pesel.All(char.IsDigit))
-            throw new ArgumentException("PESEL must contain only digits");
-
-        Value = pesel;
-
-        if (!CheckSum(pesel))
-            throw new ArgumentException("Invalid PESEL checksum");
-    }
-
-    private static bool CheckSum(string p)
-    {
-        int sum = 0;
-        for (int i = 0; i < 10; i++)
-            sum += (p[i] - '0') * Weights[i];
-
-        return (p[10] - '0') == (10 - (sum % 10)) % 10;
-    }
-}
+namespace ApplicationCore.ValueObjects.Pesel;
 
 public static class PeselDateValidator
 {
@@ -87,10 +55,9 @@ public static class PeselCheckDigitCalculator
         CalculateCheckDigit(pesel[..10]) == pesel[10] - '0';
 }
 
-public enum Gender { Male, Female }
-
 public static class PeselGenderExtractor
 {
     public static Gender Extract(string pesel)
         => (pesel[10] - '0') % 2 == 1 ? Gender.Male : Gender.Female;
 }
+

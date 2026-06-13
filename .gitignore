@@ -4,6 +4,7 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 
+*.db
 .idea
 AGENTS.md
 .opencode

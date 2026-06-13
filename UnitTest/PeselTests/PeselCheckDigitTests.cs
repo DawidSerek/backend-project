@@ -1,5 +1,5 @@
 using ApplicationCore.Models;
-using ApplicationCore.ValueObjects;
+using ApplicationCore.ValueObjects.Pesel;
 
 namespace UnitTest.PeselTests;
 
