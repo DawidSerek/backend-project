@@ -1,18 +1,17 @@
 using ApplicationCore.Models;
 using ApplicationCore.Interfaces.UnitOfWork;
-using ApplicationCore.Interfaces.Services;
 using AutoMapper;
 
-namespace ApplicationCore.Services.Ef;
+namespace ApplicationCore.Services.Ef.ContactService;
 
 public class ContactService(IUnitOfWork unitOfWork, IMapper mapper) : IContactService
 {
-    public ContactResultDto Create(ContactCreateDto contactDto)
+    public ResultContactDto Create(CreateContactDto contactDto)
     {
         var contact = mapper.Map<Contact>(contactDto);
 
         var result = unitOfWork.Contacts.Add(contact);
 
-        return mapper.Map<ContactResultDto>(result);
+        return mapper.Map<ResultContactDto>(result);
     }
 }

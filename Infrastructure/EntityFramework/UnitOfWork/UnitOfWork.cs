@@ -7,11 +7,13 @@ namespace Infrastructure.EntityFramework.UnitOfWork;
 public class UnitOfWork(
     IContactRepository contactRepository,
     IOrganizationRepository organizationRepository,
+    IPersonRepository personRepository,
     AppDbContext context
 ) : IUnitOfWork
 {
     public IContactRepository Contacts { get; } = contactRepository;
     public IOrganizationRepository Organizations { get; } = organizationRepository;
+    public IPersonRepository Persons { get; } = personRepository;
 
     private readonly AppDbContext _context = context;
 

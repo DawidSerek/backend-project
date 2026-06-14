@@ -14,3 +14,69 @@ Content-Type: application/json
   "email": "adam.nowak@gmail.com",
   "phoneNumber": "12345678901"
 }
+
+###
+
+# @name createOrganization
+POST {{WebApi_HostAddress}}/api/organizations
+Content-Type: application/json
+
+{
+  "name": "Fundacja Przyszłość",
+  "email": "fundacja.przyszlosc@fundacja-przyszlosc.org",
+  "phoneNumber": "+48 505 505 505"
+}
+
+###
+
+GET {{WebApi_HostAddress}}/api/organizations
+Accept: application/json
+
+###
+
+GET {{WebApi_HostAddress}}/api/organizations/{{createOrganization.response.body.id}}
+Accept: application/json
+
+###
+
+DELETE {{WebApi_HostAddress}}/api/organizations/{{createOrganization.response.body.id}}
+
+###
+
+# @name createPerson
+POST {{WebApi_HostAddress}}/api/person
+Content-Type: application/json
+
+{
+  "name": "Jan Kowalski",
+  "email": "jan.kowalski@example.com",
+  "phoneNumber": "+48 123 456 789",
+  "pesel": "81072381949",
+  "organizationId": "{{createOrganization.response.body.id}}"
+}
+
+###
+
+POST {{WebApi_HostAddress}}/api/person
+Content-Type: application/json
+
+{
+  "name": "Anna Nowak",
+  "email": "anna.nowak@example.com",
+  "phoneNumber": "+48 987 654 321",
+  "pesel": "77082336912"
+}
+
+###
+
+GET {{WebApi_HostAddress}}/api/person
+Accept: application/json
+
+###
+
+GET {{WebApi_HostAddress}}/api/person/{{createPerson.response.body.id}}
+Accept: application/json
+
+###
+
+DELETE {{WebApi_HostAddress}}/api/person/{{createPerson.response.body.id}}

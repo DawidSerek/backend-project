@@ -1,7 +1,7 @@
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Models;
 using Microsoft.AspNetCore.Mvc;
-using ApplicationCore.Interfaces.Services;
+using ApplicationCore.Services.Ef.ContactService;
 
 namespace Web.Controllers;
 
@@ -16,7 +16,7 @@ public class TestController(IContactService contactService) : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Post(ContactCreateDto contact)
+    public IActionResult Post(CreateContactDto contact)
     {
         var result = contactService.Create(contact);
 

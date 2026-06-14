@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
-builder.Services.RegisterEfModule(builder.Configuration);
+builder.Services.RegisterEfModule(builder.Configuration, builder.Environment.ContentRootPath);
 
 var app = builder.Build();
 

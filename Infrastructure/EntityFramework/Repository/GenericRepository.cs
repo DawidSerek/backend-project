@@ -7,7 +7,7 @@ namespace Infrastructure.EntityFramework.Repository;
 
 public class GenericRepository<T>(AppDbContext context) : IGenericRepository<T> where T : EntityBase
 {
-    private DbSet<T> DbSet => context.Set<T>();
+    protected DbSet<T> DbSet => context.Set<T>();
 
     public T? FindById(Guid id)
         => DbSet.FirstOrDefault(e => e.Id == id);
