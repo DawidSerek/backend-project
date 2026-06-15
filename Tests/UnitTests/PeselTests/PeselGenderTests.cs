@@ -1,7 +1,7 @@
 using ApplicationCore.Models;
 using ApplicationCore.ValueObjects.Pesel;
 
-namespace UnitTest.PeselTests;
+namespace Tests.UnitTests.PeselTests;
 
 public class PeselGenderTests
 {
