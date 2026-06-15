@@ -1,12 +1,12 @@
 namespace ApplicationCore.ValueObjects.Pesel;
 
-public record PESEL
+public record Pesel
 {
     public string Value { get; init; }
     public DateOnly BirthDate { get => PeselDateValidator.Decode(this.Value); }
     public Gender Gender { get => PeselGenderExtractor.Extract(this.Value); }
 
-    public PESEL(string pesel)
+    public Pesel(string pesel)
     {
         if (pesel.Length != 11)
             throw new ArgumentException("PESEL must be 11 digits long");

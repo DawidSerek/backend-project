@@ -1,14 +1,14 @@
-using ApplicationCore.ValueObjects.Pesel;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using ApplicationCore.ValueObjects.Nip;
 
 namespace Infrastructure.Configurations.ValueConverters;
 
-public class PeselConverter : ValueConverter<Pesel, string>
+public class NipConverter : ValueConverter<Nip, string>
 {
-    public PeselConverter()
+    public NipConverter()
         : base(
             pesel => pesel.Value,
-            value => new Pesel(value)
+            value => new Nip(value)
         )
     { }
 }

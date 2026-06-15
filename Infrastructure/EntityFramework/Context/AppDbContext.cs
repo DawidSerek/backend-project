@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Contact> Contacts { get; set; }
     public DbSet<Person> Persons { get; set; }
     public DbSet<Organization> Organizations { get; set; }
+    public DbSet<Company> Companies { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,17 +18,28 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<Contact>()
             .HasDiscriminator<string>("ContactType")
             .HasValue<Person>("Person")
-            .HasValue<Organization>("Organization");
+            .HasValue<Organization>("Organization")
+            .HasValue<Company>("Company");
 
-        // Person config
+        // Conversion configs
         modelBuilder.Entity<Person>()
             .Property(p => p.PESEL)
             .HasConversion(new PeselConverter(), new PeselComparer())
             .HasMaxLength(11);
 
+        modelBuilder.Entity<Company>()
+            .Property(c => c.Nip)
+            .HasConversion(new NipConverter(), new NipComparer());
+
+        // Delete behaviors
         modelBuilder.Entity<Person>()
             .HasOne(p => p.Organization)
             .WithMany(o => o.OrganizationMembers)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Person>()
+            .HasOne(p => p.Employer)
+            .WithMany(e => e.Employees)
             .OnDelete(DeleteBehavior.SetNull);
 
         base.OnModelCreating(modelBuilder);

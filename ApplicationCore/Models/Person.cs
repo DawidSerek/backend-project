@@ -3,8 +3,9 @@ namespace ApplicationCore.Models;
 
 public class Person : Contact
 {
-    public required PESEL PESEL { get; set; }
+    public required Pesel PESEL { get; set; }
     public Organization? Organization { get; set; }
+    public Company? Employer { get; set; }
 }
 
 public record CreatePersonDto
@@ -23,6 +24,6 @@ public record ResultPersonDto
     public string? Email { get; init; }
     public string? PhoneNumber { get; init; }
     public DateTime CreatedDate { get; init; }
-    public PESEL PESEL { get; init; } = null!;
+    public Pesel PESEL { get; init; } = null!;
     public Guid? OrganizationId { get; init; }
 }
