@@ -1,5 +1,6 @@
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.UnitOfWork;
+using ApplicationCore.Services.Ef.CompanyService;
 using ApplicationCore.Services.Ef.ContactService;
 using ApplicationCore.Services.Ef.OrganizationService;
 using ApplicationCore.Services.Ef.PersonService;
@@ -23,6 +24,8 @@ public static class EfModule
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IPersonRepository, PersonRepository>();
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")
@@ -38,6 +41,7 @@ public static class EfModule
         services.AddScoped<IContactService, ContactService>();
         services.AddScoped<IOrganizationService, OrganizationService>();
         services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<ICompanyService, CompanyService>();
 
         return services;
     }
