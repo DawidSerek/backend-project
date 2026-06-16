@@ -1,12 +1,15 @@
+using ApplicationCore.Interfaces.Import;
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Services.Ef.CompanyService;
 using ApplicationCore.Services.Ef.ContactService;
+using ApplicationCore.Services.Ef.ImportService;
 using ApplicationCore.Services.Ef.OrganizationService;
 using ApplicationCore.Services.Ef.PersonService;
 using Infrastructure.EntityFramework.Context;
 using Infrastructure.EntityFramework.Repository;
 using Infrastructure.EntityFramework.UnitOfWork;
+using Infrastructure.Import;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +45,10 @@ public static class EfModule
         services.AddScoped<IOrganizationService, OrganizationService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IContactFileParser, CsvContactParser>();
+        services.AddScoped<IContactFileParser, JsonContactParser>();
+        services.AddScoped<IContactImportService, ContactImportService>();
+        services.AddScoped<IContactImportFactory, ContactImportFactory>();
 
         return services;
     }

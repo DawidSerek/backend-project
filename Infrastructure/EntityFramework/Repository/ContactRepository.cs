@@ -6,6 +6,12 @@ namespace Infrastructure.EntityFramework.Repository;
 
 public class ContactRepository(AppDbContext context) : GenericRepository<Contact>(context), IContactRepository
 {
+    public bool ExistsByEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        return DbSet.Any(c => c.Email != null && c.Email.ToLower() == email.ToLower());
+    }
+
     public IEnumerable<Contact> FindByEmailDomain(string domain)
     {
         return [.. DbSet

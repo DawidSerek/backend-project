@@ -6,6 +6,7 @@ namespace ApplicationCore.Interfaces.Repository;
 // Search
 public interface IContactRepository : IGenericRepository<Contact>
 {
+    bool ExistsByEmail(string email);
     IEnumerable<Contact> FindByEmailDomain(string domain);
     IEnumerable<Person> FindByOrganizationId(Guid id);
     IEnumerable<Contact> Search(ContactSearchCriteriaDto dto);
