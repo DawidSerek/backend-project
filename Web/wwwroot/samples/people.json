@@ -1,0 +1,8 @@
+{
+  "people": [
+    { "name": "Adam Kowalski", "email": "adam2@example.com", "pesel": "44051401359" }
+  ],
+  "companies": [
+    { "name": "Acme Corp", "nip": "5261040828", "email": "contact@acme.pl" }
+  ]
+}
