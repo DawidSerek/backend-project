@@ -1,4 +1,6 @@
 using ApplicationCore.Models;
+using ApplicationCore.ValueObjects.Nip;
+using ApplicationCore.ValueObjects.Pesel;
 using Infrastructure.Configurations.ValueComparers;
 using Infrastructure.Configurations.ValueConverters;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -30,6 +32,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         modelBuilder.Entity<Company>()
             .Property(c => c.Nip)
             .HasConversion(new NipConverter(), new NipComparer());
+
+        modelBuilder.Entity<Contact>()
+            .Property(c => c.PhoneNumber)
+            .HasConversion(new PhoneNumberConverter(), new PhoneNumberComparer())
+            .HasMaxLength(16);
 
         // Delete behaviors
         modelBuilder.Entity<Person>()

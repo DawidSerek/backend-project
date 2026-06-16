@@ -20,7 +20,7 @@ public class ContactImportFactory : IContactImportFactory
             Id = Guid.NewGuid(),
             Name = name,
             Email = email,
-            PhoneNumber = phone,
+            PhoneNumber = phone is null ? null : new PhoneNumber(phone),
             PESEL = new Pesel(pesel),
             CreatedById = userId
         };
