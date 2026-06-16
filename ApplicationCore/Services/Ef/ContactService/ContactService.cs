@@ -1,17 +1,24 @@
-using ApplicationCore.Models;
 using ApplicationCore.Interfaces.UnitOfWork;
-using AutoMapper;
+using ApplicationCore.Models;
+using ApplicationCore.Models.Create;
+using ApplicationCore.Services.Ef.ContactFactory;
 
 namespace ApplicationCore.Services.Ef.ContactService;
 
-public class ContactService(IUnitOfWork unitOfWork, IMapper mapper) : IContactService
+public class ContactService(IContactFactory factory, IUnitOfWork uow) : IContactService
 {
-    public ResultContactDto Create(CreateContactDto contactDto)
+    public async Task<Contact> CreateAsync(ContactCreateBase dto, Guid userId)
     {
-        var contact = mapper.Map<Contact>(contactDto);
+        Contact contact = dto switch
+        {
+            PersonCreateDto p => factory.CreatePerson(p, userId),
+            CompanyCreateDto c => factory.CreateCompany(c, userId),
+            OrganizationCreateDto o => factory.CreateOrganization(o, userId),
+            _ => throw new ArgumentException("Unknown contact type")
+        };
 
-        var result = unitOfWork.Contacts.Add(contact);
-
-        return mapper.Map<ResultContactDto>(result);
+        uow.Contacts.Add(contact);
+        await uow.SaveChangesAsync();
+        return contact;
     }
 }

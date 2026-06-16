@@ -2,6 +2,7 @@ using ApplicationCore.Interfaces.Import;
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Services.Ef.CompanyService;
+using ApplicationCore.Services.Ef.ContactFactory;
 using ApplicationCore.Services.Ef.ContactService;
 using ApplicationCore.Services.Ef.ImportService;
 using ApplicationCore.Services.Ef.OrganizationService;
@@ -42,6 +43,7 @@ public static class EfModule
         services.AddDbContext<AppDbContext>(opts => opts.UseSqlite(sqliteBuilder.ConnectionString));
 
         services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<IContactFactory, ContactFactory>();
         services.AddScoped<IOrganizationService, OrganizationService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<ICompanyService, CompanyService>();
