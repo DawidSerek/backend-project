@@ -1,5 +1,6 @@
 using ApplicationCore.Mapping;
 using Infrastructure.Modules;
+using Infrastructure.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,11 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
 builder.Services.RegisterEfModule(builder.Configuration, builder.Environment.ContentRootPath);
+builder.Services.AddJwt(new (builder.Configuration));
 
 var app = builder.Build();
+
+await IdentitySeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -25,6 +29,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

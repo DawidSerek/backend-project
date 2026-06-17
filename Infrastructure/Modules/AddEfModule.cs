@@ -1,16 +1,20 @@
 using ApplicationCore.Interfaces.Import;
 using ApplicationCore.Interfaces.Repository;
+using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Services.Ef.CompanyService;
 using ApplicationCore.Services.Ef.ContactFactory;
 using ApplicationCore.Services.Ef.ContactService;
 using ApplicationCore.Services.Ef.ImportService;
+using ApplicationCore.Services.Ef.InteractionService;
 using ApplicationCore.Services.Ef.OrganizationService;
 using ApplicationCore.Services.Ef.PersonService;
 using Infrastructure.EntityFramework.Context;
 using Infrastructure.EntityFramework.Repository;
 using Infrastructure.EntityFramework.UnitOfWork;
+using Infrastructure.Identity;
 using Infrastructure.Import;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,6 +29,7 @@ public static class EfModule
         IConfiguration configuration,
         string contentRootPath)
     {
+        // Add repositories
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IPersonRepository, PersonRepository>();
@@ -32,6 +37,7 @@ public static class EfModule
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // Add database context and connection string
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -42,6 +48,18 @@ public static class EfModule
         }
         services.AddDbContext<AppDbContext>(opts => opts.UseSqlite(sqliteBuilder.ConnectionString));
 
+        // Add identity
+        services.AddIdentity<AppUser, IdentityRole>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 8;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Lockout.MaxFailedAccessAttempts = 5;
+        })
+        .AddEntityFrameworkStores<AppDbContext>()
+        .AddDefaultTokenProviders();
+
+        // Register services
         services.AddScoped<IContactService, ContactService>();
         services.AddScoped<IContactFactory, ContactFactory>();
         services.AddScoped<IOrganizationService, OrganizationService>();
@@ -51,6 +69,11 @@ public static class EfModule
         services.AddScoped<IContactFileParser, JsonContactParser>();
         services.AddScoped<IContactImportService, ContactImportService>();
         services.AddScoped<IContactImportFactory, ContactImportFactory>();
+        services.AddSingleton<JwtSettings>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IInteractionRepository, InteractionRepository>();
+        services.AddScoped<IInteractionService, InteractionService>();
 
         return services;
     }

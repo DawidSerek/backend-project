@@ -3,6 +3,7 @@ using System;
 using Infrastructure.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260617173054_AddRefreshTokenTableAndExtendAppUser")]
+    partial class AddRefreshTokenTableAndExtendAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.15");
@@ -51,46 +54,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Contacts");
 
                     b.HasDiscriminator<string>("ContactType").HasValue("Contact");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Interactions.Interaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("ContactId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CreatedById")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("InteractionType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ContactId");
-
-                    b.HasIndex("Date");
-
-                    b.ToTable("Interactions");
-
-                    b.HasDiscriminator<string>("InteractionType").HasValue("Interaction");
 
                     b.UseTphMappingStrategy();
                 });
@@ -376,50 +339,6 @@ namespace Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("Person");
                 });
 
-            modelBuilder.Entity("ApplicationCore.Models.Interactions.EmailInteraction", b =>
-                {
-                    b.HasBaseType("ApplicationCore.Models.Interactions.Interaction");
-
-                    b.Property<string>("FromAddress")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Subject")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ToAddress")
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Email");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Interactions.MeetingInteraction", b =>
-                {
-                    b.HasBaseType("ApplicationCore.Models.Interactions.Interaction");
-
-                    b.PrimitiveCollection<string>("Attendees")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Location")
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Meeting");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Interactions.SmsInteraction", b =>
-                {
-                    b.HasBaseType("ApplicationCore.Models.Interactions.Interaction");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasDiscriminator().HasValue("Sms");
-                });
-
             modelBuilder.Entity("Infrastructure.Identity.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
@@ -451,15 +370,6 @@ namespace Infrastructure.Migrations
                         .IsUnique();
 
                     b.HasDiscriminator().HasValue("AppUser");
-                });
-
-            modelBuilder.Entity("ApplicationCore.Models.Interactions.Interaction", b =>
-                {
-                    b.HasOne("ApplicationCore.Models.Contact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId");
-
-                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
