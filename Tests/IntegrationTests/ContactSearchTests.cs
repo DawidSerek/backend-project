@@ -1,5 +1,6 @@
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Models;
+using ApplicationCore.ValueObjects;
 using ApplicationCore.ValueObjects.Pesel;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +21,7 @@ public class ContactSearchTests(WebApplicationFactory<Program> factory) : IClass
             Id = Guid.NewGuid(),
             Name = "Adam",
             PESEL = new Pesel("44051401359"),
-            Email = "adam@wsei.pl",
+            Email = new EmailAddress("adam@wsei.pl"),
             CreatedById = Guid.NewGuid()
         };
         unitOfWork.Contacts.Add(adam);

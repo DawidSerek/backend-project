@@ -15,7 +15,7 @@ public class ContactFactory(IUnitOfWork uow) : IContactFactory
         {
             Id = Guid.NewGuid(),
             Name = dto.Name,
-            Email = dto.Email,
+            Email = new EmailAddress(dto.Email),
             PhoneNumber = dto.Phone is null ? null : new PhoneNumber(dto.Phone),
             PESEL = new Pesel(dto.Pesel),
             CreatedById = userId
@@ -39,7 +39,7 @@ public class ContactFactory(IUnitOfWork uow) : IContactFactory
     {
         Id = Guid.NewGuid(),
         Name = dto.Name,
-        Email = dto.Email,
+        Email = new EmailAddress(dto.Email),
         PhoneNumber = dto.Phone is null ? null : new PhoneNumber(dto.Phone),
         Nip = new Nip(dto.Nip),
         Regon = dto.Regon,
@@ -52,7 +52,7 @@ public class ContactFactory(IUnitOfWork uow) : IContactFactory
     {
         Id = Guid.NewGuid(),
         Name = dto.Name,
-        Email = dto.Email,
+        Email = new EmailAddress(dto.Email),
         PhoneNumber = dto.Phone is null ? null : new PhoneNumber(dto.Phone),
         CreatedById = userId
     };

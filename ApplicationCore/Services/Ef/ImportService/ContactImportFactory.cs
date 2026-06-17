@@ -19,7 +19,7 @@ public class ContactImportFactory : IContactImportFactory
         {
             Id = Guid.NewGuid(),
             Name = name,
-            Email = email,
+            Email = new EmailAddress(email),
             PhoneNumber = phone is null ? null : new PhoneNumber(phone),
             PESEL = new Pesel(pesel),
             CreatedById = userId
@@ -37,7 +37,7 @@ public class ContactImportFactory : IContactImportFactory
         {
             Id = Guid.NewGuid(),
             Name = name,
-            Email = email,
+            Email = new EmailAddress(email),
             Nip = new Nip(nip),
             CreatedById = userId
         };

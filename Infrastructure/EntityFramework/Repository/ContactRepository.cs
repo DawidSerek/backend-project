@@ -1,5 +1,6 @@
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Models;
+using ApplicationCore.ValueObjects;
 using Infrastructure.EntityFramework.Context;
 
 namespace Infrastructure.EntityFramework.Repository;
@@ -9,14 +10,14 @@ public class ContactRepository(AppDbContext context) : GenericRepository<Contact
     public bool ExistsByEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email)) return false;
-        return DbSet.Any(c => c.Email != null && c.Email.ToLower() == email.ToLower());
+        return DbSet.Any(c => c.Email != null && c.Email.Value.ToLower() == email.ToLower());
     }
 
     public IEnumerable<Contact> FindByEmailDomain(string domain)
     {
         return [.. DbSet
             .Where(x => x.Email != null)
-            .Where(x => x.Email!.ToLower().EndsWith('@' + domain.ToLower()))];
+            .Where(x => x.Email!.Value.ToLower().EndsWith('@' + domain.ToLower()))];
     }
 
     public IEnumerable<Person> FindByOrganizationId(Guid organizationId)
@@ -40,7 +41,7 @@ public class ContactRepository(AppDbContext context) : GenericRepository<Contact
         {
             query = query
                 .Where(x => x.Email != null)
-                .Where(x => x.Email!.ToLower().Contains('@' + dto.EmailDomain));
+                .Where(x => x.Email!.Value.ToLower().Contains('@' + dto.EmailDomain));
         }
 
         if (dto.OrganizationId.HasValue)

@@ -1,5 +1,6 @@
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Models;
+using ApplicationCore.ValueObjects;
 using Infrastructure.EntityFramework.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,7 @@ public class CompanyRepository(AppDbContext context) : GenericRepository<Company
         Func<Person, IComparable> keySelector = sortBy switch
         {
             EmployeeSortField.Name => p => p.Name,
-            EmployeeSortField.Email => p => p.Email ?? string.Empty,
+            EmployeeSortField.Email => p => p.Email != null ? p.Email.Value : string.Empty,
             EmployeeSortField.BirthDate => p => p.PESEL.BirthDate,
             _ => p => p.Name
         };

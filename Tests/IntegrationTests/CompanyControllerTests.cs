@@ -1,6 +1,7 @@
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Models;
+using ApplicationCore.ValueObjects;
 using ApplicationCore.ValueObjects.Nip;
 using ApplicationCore.ValueObjects.Pesel;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -35,7 +36,7 @@ public class CompanyControllerTests(WebApplicationFactory<Program> factory) : IC
                 Id = Guid.NewGuid(),
                 Name = $"Employee {i}",
                 PESEL = new Pesel("44051401359"),
-                Email = $"e{i}@acme.test",
+                Email = new EmailAddress($"e{i}@acme.test"),
                 CreatedById = Guid.NewGuid(),
                 Employer = acme
             });
