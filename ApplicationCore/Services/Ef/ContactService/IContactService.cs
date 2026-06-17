@@ -6,4 +6,5 @@ namespace ApplicationCore.Services.Ef.ContactService;
 public interface IContactService
 {
     Task<Contact> CreateAsync(ContactCreateBase dto, Guid userId);
+    Task<Contact?> UpdateAsync(Guid id, ContactCreateBase dto);
 }

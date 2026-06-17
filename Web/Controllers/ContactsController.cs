@@ -49,6 +49,27 @@ public class ContactsController(IContactService service, IUnitOfWork uow) : Cont
         return NoContent();
     }
 
+    [HttpPut("{id:guid}")]
+    // [Authorize]
+    public async Task<IActionResult> Update(Guid id, [FromBody] ContactCreateBase dto)
+    {
+        var c = uow.Contacts.FindById(id);
+        if (c is null) return NotFound();
+
+        var userId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Admin");
+
+        if (c.CreatedById != userId && !isAdmin)
+            return Forbid();
+
+        try
+        {
+            var result = await service.UpdateAsync(id, dto);
+            return Ok(result);
+        }
+        catch (ArgumentException ex) { return BadRequest(new { error = ex.Message }); }
+    }
+
     private Guid GetCurrentUserId()
     {
         // For now: get from JWT (Task 5 will set this up properly)

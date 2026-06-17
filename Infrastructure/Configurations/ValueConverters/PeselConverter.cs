@@ -8,7 +8,7 @@ public class PeselConverter : ValueConverter<Pesel, string>
     public PeselConverter()
         : base(
             pesel => pesel.Value,
-            value => new Pesel(value)
+            v => new Pesel(v)
         )
     { }
 }
