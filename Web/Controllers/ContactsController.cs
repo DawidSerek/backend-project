@@ -72,7 +72,6 @@ public class ContactsController(IContactService service, IUnitOfWork uow) : Cont
 
     private Guid GetCurrentUserId()
     {
-        // For now: get from JWT (Task 5 will set this up properly)
         var claim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
         return claim is null ? Guid.Empty : Guid.Parse(claim.Value);
     }

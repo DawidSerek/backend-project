@@ -4,8 +4,9 @@ using ApplicationCore.Models.Create;
 using ApplicationCore.ValueObjects;
 using ApplicationCore.ValueObjects.Nip;
 using ApplicationCore.ValueObjects.Pesel;
+using ApplicationCore.Services.ContactFactory;
 
-namespace ApplicationCore.Services.Ef.ContactFactory;
+namespace ApplicationCore.Services.ContactFactory;
 
 public class ContactFactory(IUnitOfWork uow) : IContactFactory
 {

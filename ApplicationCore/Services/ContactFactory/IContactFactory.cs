@@ -1,7 +1,8 @@
 using ApplicationCore.Models;
 using ApplicationCore.Models.Create;
+using ApplicationCore.Services.ContactFactory;
 
-namespace ApplicationCore.Services.Ef.ContactFactory;
+namespace ApplicationCore.Services.ContactFactory;
 
 public interface IContactFactory
 {

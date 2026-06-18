@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Company> Companies { get; set; }
     public DbSet<Interaction> Interactions { get; set; }
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<RemovedContact> RemovedContacts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,6 +58,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .Property(c => c.Email)
             .HasConversion(new EmailAddressConverter(), new EmailAddressComparer())
             .HasMaxLength(256);
+
+        modelBuilder.Entity<RemovedContact>(e =>
+        {
+            e.Property(r => r.OriginalContactId).IsRequired();
+            e.Property(r => r.Type).HasMaxLength(50);
+            e.Property(r => r.JsonSnapshot).IsRequired();
+            e.Property(r => r.RemovedById).HasMaxLength(450);
+            e.HasIndex(r => r.OriginalContactId);
+        });
 
         // Delete behaviors
         modelBuilder.Entity<Person>()

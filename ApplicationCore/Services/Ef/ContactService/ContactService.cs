@@ -1,8 +1,8 @@
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Models;
 using ApplicationCore.Models.Create;
-using ApplicationCore.Services.Ef.ContactFactory;
 using ApplicationCore.ValueObjects;
+using ApplicationCore.Services.ContactFactory;
 
 namespace ApplicationCore.Services.Ef.ContactService;
 

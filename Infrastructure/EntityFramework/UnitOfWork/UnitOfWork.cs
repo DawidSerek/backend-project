@@ -9,6 +9,7 @@ public class UnitOfWork(
     IOrganizationRepository organizationRepository,
     IPersonRepository personRepository,
     ICompanyRepository companyRepository,
+    IRemovedContactRepository removedContactRepository,
     AppDbContext context
 ) : IUnitOfWork
 {
@@ -16,6 +17,7 @@ public class UnitOfWork(
     public IOrganizationRepository Organizations { get; } = organizationRepository;
     public IPersonRepository Persons { get; } = personRepository;
     public ICompanyRepository Companies { get; } = companyRepository;
+    public IRemovedContactRepository RemovedContacts { get; } = removedContactRepository;
 
     private readonly AppDbContext _context = context;
 

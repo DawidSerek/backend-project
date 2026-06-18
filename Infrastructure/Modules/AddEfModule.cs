@@ -2,8 +2,9 @@ using ApplicationCore.Interfaces.Import;
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Interfaces.UnitOfWork;
+using ApplicationCore.Services.ContactFactory;
+using ApplicationCore.Services.DeduplicationStrategy;
 using ApplicationCore.Services.Ef.CompanyService;
-using ApplicationCore.Services.Ef.ContactFactory;
 using ApplicationCore.Services.Ef.ContactService;
 using ApplicationCore.Services.Ef.ImportService;
 using ApplicationCore.Services.Ef.InteractionService;
@@ -29,13 +30,41 @@ public static class EfModule
         IConfiguration configuration,
         string contentRootPath)
     {
-        // Add repositories
+        // Add repositories & Unit of work
         services.AddScoped<IContactRepository, ContactRepository>();
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IContactRepository, ContactRepository>();
+        services.AddScoped<IInteractionRepository, InteractionRepository>();
+        services.AddScoped<IRemovedContactRepository, RemovedContactRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Services
+
+        // Contact
+        services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<IContactFactory, ContactFactory>();
+        services.AddScoped<IContactImportService, ContactImportService>();
+        services.AddScoped<IContactFileParser, CsvContactParser>();
+        services.AddScoped<IContactFileParser, JsonContactParser>();
+        services.AddScoped<IContactImportFactory, ContactImportFactory>();
+
+        // Contact - implementations
+        services.AddScoped<IOrganizationService, OrganizationService>();
+        services.AddScoped<IPersonService, PersonService>();
+        services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IAdminService, AdminService>();
+
+        // Interaction
+        services.AddScoped<IInteractionService, InteractionService>();
+
+        // Authentication
+        services.AddSingleton<JwtSettings>();
+        services.AddScoped<IAuthService, AuthService>();
+
+        // Other services
+        services.AddScoped<IDeduplicationStrategyService, DeduplicationStrategyService>();
 
         // Add database context and connection string
         var connectionString = configuration.GetConnectionString("DefaultConnection")
@@ -58,22 +87,6 @@ public static class EfModule
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
-
-        // Register services
-        services.AddScoped<IContactService, ContactService>();
-        services.AddScoped<IContactFactory, ContactFactory>();
-        services.AddScoped<IOrganizationService, OrganizationService>();
-        services.AddScoped<IPersonService, PersonService>();
-        services.AddScoped<ICompanyService, CompanyService>();
-        services.AddScoped<IContactFileParser, CsvContactParser>();
-        services.AddScoped<IContactFileParser, JsonContactParser>();
-        services.AddScoped<IContactImportService, ContactImportService>();
-        services.AddScoped<IContactImportFactory, ContactImportFactory>();
-        services.AddSingleton<JwtSettings>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IAdminService, AdminService>();
-        services.AddScoped<IInteractionRepository, InteractionRepository>();
-        services.AddScoped<IInteractionService, InteractionService>();
 
         return services;
     }
