@@ -19,6 +19,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Interaction> Interactions { get; set; }
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<RemovedContact> RemovedContacts { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<Position> Positions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,12 +81,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .WithMany(e => e.Employees)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // AppUser constraints
+        modelBuilder.Entity<Person>()
+            .HasOne(p => p.Position)
+            .WithMany()
+            .OnDelete(DeleteBehavior.SetNull);
+
+        // Constraints
         modelBuilder.Entity<AppUser>(e => {
             e.Property(u => u.FirstName).HasMaxLength(100);
             e.Property(u => u.LastName).HasMaxLength(100);
             e.HasIndex(u => u.Email).IsUnique();
         });
+
+        modelBuilder.Entity<Position>()
+            .HasIndex(p => p.Name)
+            .IsUnique();
 
         base.OnModelCreating(modelBuilder);
     }

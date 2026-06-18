@@ -10,6 +10,7 @@ public class UnitOfWork(
     IPersonRepository personRepository,
     ICompanyRepository companyRepository,
     IRemovedContactRepository removedContactRepository,
+    IPositionRepository positionRepository,
     AppDbContext context
 ) : IUnitOfWork
 {
@@ -18,6 +19,7 @@ public class UnitOfWork(
     public IPersonRepository Persons { get; } = personRepository;
     public ICompanyRepository Companies { get; } = companyRepository;
     public IRemovedContactRepository RemovedContacts { get; } = removedContactRepository;
+    public IPositionRepository Positions { get; } = positionRepository;
 
     private readonly AppDbContext _context = context;
 

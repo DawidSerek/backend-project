@@ -8,6 +8,7 @@ public interface IUnitOfWork
     public IPersonRepository Persons { get; }
     public ICompanyRepository Companies { get; }
     public IRemovedContactRepository RemovedContacts { get; }
+    public IPositionRepository Positions { get; }
 
     public Task<int> SaveChangesAsync();
     public Task BeginTransactionAsync();
