@@ -1,15 +1,30 @@
 using ApplicationCore.Interfaces.UnitOfWork;
+using ApplicationCore.Interfaces.Validation;
 using ApplicationCore.Models;
 using ApplicationCore.Models.Create;
-using ApplicationCore.ValueObjects;
 using ApplicationCore.Services.ContactFactory;
+using ApplicationCore.Services.DeduplicationStrategy;
+using ApplicationCore.ValueObjects;
 
 namespace ApplicationCore.Services.Ef.ContactService;
 
-public class ContactService(IContactFactory factory, IUnitOfWork uow) : IContactService
+public class ContactService(
+    IContactFactory factory,
+    IUnitOfWork uow,
+    IKrsValidator krs,
+    IWebsiteValidator website,
+    IDeduplicationStrategyService dedup
+) : IContactService
 {
     public async Task<Contact> CreateAsync(ContactCreateBase dto, Guid userId)
     {
+        if (dto is OrganizationCreateDto orgDto)
+        {
+            if (orgDto.Krs is not null && !await krs.ValidateKrsAsync(orgDto.Krs))
+                throw new ArgumentException($"KRS '{orgDto.Krs}' is not valid");
+            if (orgDto.Website is not null && !await website.ValidateAsync(orgDto.Website))
+                throw new ArgumentException($"Website '{orgDto.Website}' is not reachable");
+        }
         Contact contact = dto switch
         {
             PersonCreateDto p => factory.CreatePerson(p, userId),
@@ -17,6 +32,13 @@ public class ContactService(IContactFactory factory, IUnitOfWork uow) : IContact
             OrganizationCreateDto o => factory.CreateOrganization(o, userId),
             _ => throw new ArgumentException("Unknown contact type")
         };
+
+        var dedupConfig = new DeduplicationConfigDto(
+            Threshold: 1.0,
+            Properties: new List<string> { "name", "email", "phonenumber" },
+            Strategy: DeduplicationStrategyOptions.Exact);
+        if (await dedup.IsDuplicateOfExistingAsync(contact, dedupConfig))
+            throw new ArgumentException("Contact already exists");
 
         uow.Contacts.Add(contact);
         await uow.SaveChangesAsync();

@@ -88,4 +88,22 @@ public class DeduplicationStrategyService(
 
         return pairs;
     }
+
+    public async Task<bool> IsDuplicateOfExistingAsync(Contact newContact, DeduplicationConfigDto config)
+    {
+        var existing = uow.Contacts.GetAll().ToList();
+        IDeduplicationStrategy strategy = config.Strategy switch
+        {
+            DeduplicationStrategyOptions.Exact => new ExactStrategy(),
+            DeduplicationStrategyOptions.Fuzzy => new FuzzyStrategy(),
+            _ => new FuzzyStrategy()
+        };
+
+        foreach (var c in existing)
+        {
+            if (c.Id == newContact.Id) continue;
+            if (strategy.IsMatch(newContact, c, config)) return true;
+        }
+        return false;
+    }
 }

@@ -1,7 +1,9 @@
+using ApplicationCore.Interfaces.Validation;
 using ApplicationCore.Mapping;
+using FluentValidation.AspNetCore;
 using Infrastructure.Modules;
 using Infrastructure.Seed;
-using FluentValidation.AspNetCore;
+using Infrastructure.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,11 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 builder.Services.RegisterEfModule(builder.Configuration, builder.Environment.ContentRootPath);
 builder.Services.AddJwt(new (builder.Configuration));
 builder.Services.AddFluentValidationAutoValidation();
+
+builder.Services.AddScoped<IKrsValidator, MockKrsValidator>();
+// builder.Services.AddHttpClient<IKrsValidator, KrsValidator>(c => c.Timeout = TimeSpan.FromSeconds(5));
+
+builder.Services.AddHttpClient<IWebsiteValidator, WebsiteValidator>(c => c.Timeout = TimeSpan.FromSeconds(5));
 
 var app = builder.Build();
 

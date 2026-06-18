@@ -7,7 +7,10 @@ namespace Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrganizationsController(IUnitOfWork unitOfWork, IOrganizationService organizationService) : ControllerBase
+public class OrganizationsController(
+    IUnitOfWork unitOfWork,
+    IOrganizationService organizationService
+) : ControllerBase
 {
     [HttpGet]
     public IActionResult GetAll()

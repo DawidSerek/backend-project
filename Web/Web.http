@@ -1,82 +1,604 @@
-@WebApi_HostAddress = http://localhost:5041
+### Variables
+@host = http://localhost:5041
 
-GET {{WebApi_HostAddress}}/api/test
+### Credentials (seeded by IdentitySeeder)
+@adminEmail = admin@local
+@adminPassword = Admin123!
+
+###############################################################################
+### TestController  GET /api/test  (smoke test)
+###############################################################################
+
+GET {{host}}/api/test
 Accept: application/json
 
 ###
 
-POST {{WebApi_HostAddress}}/api/test
-Accept: application/json
+###############################################################################
+### AuthController  /api/auth/{login,refresh,revoke,me}
+###############################################################################
+
+# @name loginAdmin
+POST {{host}}/api/auth/login
 Content-Type: application/json
 
 {
-  "name": "Adam",
-  "email": "adam.nowak@gmail.com",
-  "phoneNumber": "12345678901"
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
 }
 
 ###
 
-# @name createOrganization
-POST {{WebApi_HostAddress}}/api/organizations
+# Capture token for the rest of the file
+@adminToken = {{loginAdmin.response.body.accessToken}}
+@adminRefreshToken = {{loginAdmin.response.body.refreshToken}}
+
+GET {{host}}/api/auth/me
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+POST {{host}}/api/auth/refresh
 Content-Type: application/json
 
 {
+  "accessToken": "{{adminToken}}",
+  "refreshToken": "{{adminRefreshToken}}"
+}
+
+###
+
+POST {{host}}/api/auth/revoke
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "token": "{{adminRefreshToken}}"
+}
+
+###
+
+###############################################################################
+### AdminController  /api/admin/*  [Authorize(Roles = "Admin")]
+###############################################################################
+
+GET {{host}}/api/admin/users
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+# @name createUser01
+POST {{host}}/api/admin/users?password=User123!
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "email": "user01@local",
+  "firstName": "User",
+  "lastName": "One",
+  "roles": [ "User" ]
+}
+
+###
+
+@user01Id = {{createUser01.response.body.id}}
+
+GET {{host}}/api/admin/users/{{user01Id}}
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+PATCH {{host}}/api/admin/users/{{user01Id}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "firstName": "User1",
+  "lastName": "Renamed"
+}
+
+###
+
+POST {{host}}/api/admin/users/{{user01Id}}/deactivate
+Authorization: Bearer {{adminToken}}
+
+###
+
+POST {{host}}/api/admin/users/{{user01Id}}/activate
+Authorization: Bearer {{adminToken}}
+
+###
+
+POST {{host}}/api/admin/users/{{user01Id}}/roles
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+"SalesManager"
+
+###
+
+DELETE {{host}}/api/admin/users/{{user01Id}}/roles/SalesManager
+Authorization: Bearer {{adminToken}}
+
+###
+
+###############################################################################
+### PositionsController  /api/positions  (Task 8)
+###############################################################################
+
+GET {{host}}/api/positions
+Accept: application/json
+
+###
+
+###############################################################################
+### TagsController  /api/tags  (Task 8)
+###############################################################################
+
+# @name createTagVip
+POST {{host}}/api/tags
+Content-Type: application/json
+
+{
+  "name": "VIP",
+  "color": "#FFD700"
+}
+
+###
+
+GET {{host}}/api/tags
+Accept: application/json
+
+###
+
+# Tag.attach / detach / search-by-tag use a contact id; create one first
+# @name createPersonForTag
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Person",
+  "name": "Piotr Tagtest",
+  "email": "piotr.tagtest@example.com",
+  "phone": "+48 600 600 600",
+  "pesel": "90010100019"
+}
+
+###
+
+@tagtestPersonId = {{createPersonForTag.response.body.id}}
+
+POST {{host}}/api/tags/contacts/{{tagtestPersonId}}/VIP
+
+###
+
+DELETE {{host}}/api/tags/contacts/{{tagtestPersonId}}/VIP
+
+###
+
+GET {{host}}/api/tags/contacts/by-tag/VIP
+Accept: application/json
+
+###
+
+###############################################################################
+### ContactsController  /api/contacts  (polymorphic, discriminator="contactType")
+###############################################################################
+
+# @name createOrgPoly
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Organization",
   "name": "Fundacja Przyszłość",
-  "email": "fundacja.przyszlosc@fundacja-przyszlosc.org",
-  "phoneNumber": "+48 505 505 505"
+  "email": "info@fundacja.pl",
+  "phone": "+48 505 505 505"
 }
 
 ###
 
-GET {{WebApi_HostAddress}}/api/organizations
+@orgId = {{createOrgPoly.response.body.id}}
+
+# @name createCompanyPoly
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Company",
+  "name": "Acme Corp",
+  "email": "contact@acme.pl",
+  "phone": "+48 22 000 00 00",
+  "nip": "1234567890",
+  "regon": "123456789",
+  "industry": "IT",
+  "website": "https://acme.pl"
+}
+
+###
+
+@companyId = {{createCompanyPoly.response.body.id}}
+
+# @name createPersonPoly
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Person",
+  "name": "Adam Kowalski",
+  "email": "adam.kowalski@example.com",
+  "phone": "+48 123 456 789",
+  "pesel": "90010100019",
+  "organizationId": "{{orgId}}",
+  "employerId": "{{companyId}}",
+  "position": "Developer"
+}
+
+###
+
+# Validator in action: Position not in seeded list -> 400
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Person",
+  "name": "Bad Position Person",
+  "email": "bad@example.com",
+  "phone": "+48 100 200 300",
+  "pesel": "90010100019",
+  "position": "Astronaut"
+}
+
+###
+
+@personId = {{createPersonPoly.response.body.id}}
+
+GET {{host}}/api/contacts/{{personId}}
 Accept: application/json
 
 ###
 
-GET {{WebApi_HostAddress}}/api/organizations/{{createOrganization.response.body.id}}
+PUT {{host}}/api/contacts/{{personId}}
+Content-Type: application/json
+
+{
+  "contactType": "Person",
+  "name": "Adam Kowalski-Updated",
+  "email": "adam.kowalski@example.com",
+  "phone": "+48 123 456 789",
+  "pesel": "90010100019",
+  "organizationId": "{{orgId}}",
+  "position": "Senior Developer"
+}
+
+###
+
+DELETE {{host}}/api/contacts/{{personId}}
+
+###
+
+###############################################################################
+### CompaniesController  /api/companies
+###############################################################################
+
+# @name createCompany
+POST {{host}}/api/companies
+Content-Type: application/json
+
+{
+  "name": "Wsei SA",
+  "email": "office@wsei.pl",
+  "phoneNumber": "+48 12 000 00 00",
+  "nip": "1234567890",
+  "regon": "123456789",
+  "industry": "Education",
+  "website": "https://wsei.pl"
+}
+
+###
+
+@companyId2 = {{createCompany.response.body.id}}
+
+GET {{host}}/api/companies
 Accept: application/json
 
 ###
 
-DELETE {{WebApi_HostAddress}}/api/organizations/{{createOrganization.response.body.id}}
+GET {{host}}/api/companies/{{companyId2}}
+Accept: application/json
 
 ###
 
-# @name createPerson
-POST {{WebApi_HostAddress}}/api/person
+GET {{host}}/api/companies/by-nip/1234567890
+Accept: application/json
+
+###
+
+GET {{host}}/api/companies/search?name=acme
+Accept: application/json
+
+###
+
+GET {{host}}/api/companies/search?nip=1234567890
+Accept: application/json
+
+###
+
+GET {{host}}/api/companies/{{companyId2}}/employees
+Accept: application/json
+
+###
+
+GET {{host}}/api/companies/{{companyId2}}/employees/sorted?sortBy=name&desc=true
+Accept: application/json
+
+###
+
+DELETE {{host}}/api/companies/{{companyId2}}
+
+###
+
+###############################################################################
+### PersonController  /api/person
+###############################################################################
+
+# @name createPersonLegacy
+POST {{host}}/api/person
 Content-Type: application/json
 
 {
   "name": "Jan Kowalski",
   "email": "jan.kowalski@example.com",
   "phoneNumber": "+48 123 456 789",
-  "pesel": "81072381949",
-  "organizationId": "{{createOrganization.response.body.id}}"
+  "pesel": "90010100019"
 }
 
 ###
 
-POST {{WebApi_HostAddress}}/api/person
+@personLegacyId = {{createPersonLegacy.response.body.id}}
+
+GET {{host}}/api/person
+Accept: application/json
+
+###
+
+GET {{host}}/api/person/{{personLegacyId}}
+Accept: application/json
+
+###
+
+DELETE {{host}}/api/person/{{personLegacyId}}
+
+###
+
+###############################################################################
+### OrganizationsController  /api/organizations  (legacy, uses CreateContactDto)
+###############################################################################
+
+# @name createOrgLegacy
+POST {{host}}/api/organizations
 Content-Type: application/json
 
 {
-  "name": "Anna Nowak",
-  "email": "anna.nowak@example.com",
-  "phoneNumber": "+48 987 654 321",
-  "pesel": "77082336912"
+  "name": "Stowarzyszenie Wspólny Cel",
+  "email": "biuro@wspolnycel.pl",
+  "phoneNumber": "+48 22 111 22 33"
 }
 
 ###
 
-GET {{WebApi_HostAddress}}/api/person
+@orgLegacyId = {{createOrgLegacy.response.body.id}}
+
+GET {{host}}/api/organizations
 Accept: application/json
 
 ###
 
-GET {{WebApi_HostAddress}}/api/person/{{createPerson.response.body.id}}
+GET {{host}}/api/organizations/{{orgLegacyId}}
 Accept: application/json
 
 ###
 
-DELETE {{WebApi_HostAddress}}/api/person/{{createPerson.response.body.id}}
+DELETE {{host}}/api/organizations/{{orgLegacyId}}
+
+###
+
+###############################################################################
+### InteractionsController  /api/contacts/{contactId}/interactions  [Authorize]
+### (polymorphic, discriminator="Type": Email | Sms | Meeting)
+###############################################################################
+
+# @name createPersonForInteractions
+POST {{host}}/api/contacts
+Content-Type: application/json
+
+{
+  "contactType": "Person",
+  "name": "Ewa Interakcje",
+  "email": "ewa@example.com",
+  "phone": "+48 700 700 700",
+  "pesel": "90010100019"
+}
+
+###
+
+@interactionsContactId = {{createPersonForInteractions.response.body.id}}
+
+# Email
+POST {{host}}/api/contacts/{{interactionsContactId}}/interactions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "type": "Email",
+  "date": "2026-01-15T10:00:00Z",
+  "content": "Follow-up email",
+  "subject": "Re: meeting",
+  "fromAddress": "ewa@example.com",
+  "toAddress": "sales@wsei.pl"
+}
+
+###
+
+# Sms
+POST {{host}}/api/contacts/{{interactionsContactId}}/interactions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "type": "Sms",
+  "date": "2026-01-16T14:30:00Z",
+  "content": "Reminder about tomorrow",
+  "phoneNumber": "+48 700 700 700"
+}
+
+###
+
+# Meeting
+POST {{host}}/api/contacts/{{interactionsContactId}}/interactions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "type": "Meeting",
+  "date": "2026-01-20T09:00:00Z",
+  "content": "Onboarding meeting",
+  "location": "Wsei Kraków, room 204",
+  "endTime": "2026-01-20T10:00:00Z"
+}
+
+###
+
+GET {{host}}/api/contacts/{{interactionsContactId}}/interactions?page=1&pageSize=20
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+GET {{host}}/api/contacts/{{interactionsContactId}}/interactions?type=Email
+Authorization: Bearer {{adminToken}}
+Accept: application/json
+
+###
+
+# @name createThrowawayInteraction
+POST {{host}}/api/contacts/{{interactionsContactId}}/interactions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "type": "Sms",
+  "date": "2026-01-17T08:00:00Z",
+  "content": "throwaway",
+  "phoneNumber": "+48 700 700 700"
+}
+
+###
+
+@throwawayId = {{createThrowawayInteraction.response.body.id}}
+
+DELETE {{host}}/api/interactions/{{throwawayId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+###############################################################################
+### DeduplicationController  /api/deduplication/*  [Authorize(Roles="Admin,SalesManager")]
+###############################################################################
+
+# @name findDuplicatesExact
+POST {{host}}/api/deduplication/find
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "threshold": 1.0,
+  "properties": [ "Name" ],
+  "strategy": 0
+}
+
+###
+
+POST {{host}}/api/deduplication/find
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "threshold": 0.85,
+  "properties": [ "Name", "Email" ],
+  "strategy": 1
+}
+
+###
+
+POST {{host}}/api/deduplication/remove
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "threshold": 0.95,
+  "properties": [ "Name" ],
+  "strategy": 0
+}
+
+###
+
+###############################################################################
+### ImportController  /api/import/contacts  (multipart, csv or json)
+###############################################################################
+
+POST {{host}}/api/import/contacts
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="contacts.csv"
+Content-Type: text/csv
+
+name,email,phoneNumber,pesel,nip
+Marek Importowy,mark.import@example.com,+48 600 100 200,90010100019,
+Anna Importowa,anna.import@example.com,+48 600 100 201,90010100020,
+Import Co,,+48 600 100 202,,1234567890
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+POST {{host}}/api/import/contacts
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="contacts.json"
+Content-Type: application/json
+
+{
+  "people": [
+    { "name": "Piotr JSON", "email": "piotr.json@example.com", "phoneNumber": "+48 700 100 200", "pesel": "90010100019" }
+  ],
+  "companies": [
+    { "name": "JSON Sp zoo", "email": "office@json.example", "phoneNumber": "+48 700 100 201", "nip": "1234567890" }
+  ],
+  "organizations": [
+    { "name": "JSON Fundacja", "email": "kontakt@jsonfundacja.example", "phoneNumber": "+48 700 100 202" }
+  ]
+}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+###############################################################################
+### Notes
+###############################################################################
+# - ValuesController is excluded: its class name is `ValuesControllerController`
+#   (a leftover typo), so its route is `api/ValuesControllerController`. Not used
+#   by anything. Safe to delete.
+# - ContactsController requires no auth (the [Authorize] is commented out per
+#   AGENTS.md), so you can hit it without a token. Interactions, Admin, and
+#   Deduplication do require auth.
+# - Admin token is reused for everything; create a non-admin user via
+#   POST /api/admin/users to test 403 paths.
+# - Variables like @adminToken and @*Id are resolved at request time, not edit
+#   time, so don't worry if they look like placeholders in the editor.

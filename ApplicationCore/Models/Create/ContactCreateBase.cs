@@ -36,4 +36,6 @@ public class OrganizationCreateDto : ContactCreateBase
     public required string Name { get; set; }
     public string? Email { get; set; }
     public string? Phone { get; set; }
+    public string? Krs { get; set; }
+    public string? Website { get; set; }
 }

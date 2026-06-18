@@ -12,6 +12,7 @@ public interface IDeduplicationStrategyService
 {
     Task<DeduplicationReportDto> FindDuplicatesAsync(DeduplicationConfigDto config);
     Task<DeduplicationReportDto> RemoveDuplicatesAsync(DeduplicationConfigDto config, Guid userId);
+    Task<bool> IsDuplicateOfExistingAsync(Contact newContact, DeduplicationConfigDto config);
 }
 
 public enum DeduplicationStrategyOptions

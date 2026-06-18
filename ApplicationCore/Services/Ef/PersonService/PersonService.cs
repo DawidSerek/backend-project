@@ -16,6 +16,13 @@ public class PersonService(IUnitOfWork unitOfWork, IMapper mapper) : IPersonServ
                 ?? throw new KeyNotFoundException($"Organization {organizationId} not found");
         }
 
+        if (!string.IsNullOrWhiteSpace(personDto.Position))
+        {
+            person.Position = unitOfWork.Positions.GetAll().FirstOrDefault(p =>
+                p.Name.Equals(personDto.Position, StringComparison.OrdinalIgnoreCase))
+                ?? throw new KeyNotFoundException($"Position '{personDto.Position}' not found");
+        }
+
         unitOfWork.Persons.Add(person);
 
         return mapper.Map<ResultContactDto>(person);

@@ -11,6 +11,7 @@ using ApplicationCore.Services.Ef.ImportService;
 using ApplicationCore.Services.Ef.InteractionService;
 using ApplicationCore.Services.Ef.OrganizationService;
 using ApplicationCore.Services.Ef.PersonService;
+using ApplicationCore.Services.TagService;
 using ApplicationCore.Services.Validator;
 using FluentValidation;
 using Infrastructure.EntityFramework.Context;
@@ -62,6 +63,7 @@ public static class EfModule
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<ITagService, TagService>();
 
         // Interaction
         services.AddScoped<IInteractionService, InteractionService>();

@@ -1,10 +1,10 @@
 using ApplicationCore.Interfaces.UnitOfWork;
 using ApplicationCore.Models;
 using ApplicationCore.Models.Create;
+using ApplicationCore.Services.ContactFactory;
 using ApplicationCore.ValueObjects;
 using ApplicationCore.ValueObjects.Nip;
 using ApplicationCore.ValueObjects.Pesel;
-using ApplicationCore.Services.ContactFactory;
 
 namespace ApplicationCore.Services.ContactFactory;
 
@@ -33,6 +33,13 @@ public class ContactFactory(IUnitOfWork uow) : IContactFactory
                 ?? throw new KeyNotFoundException($"Company {employerId} not found");
         }
 
+        if (!string.IsNullOrWhiteSpace(dto.Position))
+        {
+            person.Position = uow.Positions.GetAll().FirstOrDefault(p =>
+                p.Name.Equals(dto.Position, StringComparison.OrdinalIgnoreCase))
+                ?? throw new KeyNotFoundException($"Position '{dto.Position}' not found");
+        }
+
         return person;
     }
 
@@ -55,6 +62,8 @@ public class ContactFactory(IUnitOfWork uow) : IContactFactory
         Name = dto.Name,
         Email = new EmailAddress(dto.Email),
         PhoneNumber = dto.Phone is null ? null : new PhoneNumber(dto.Phone),
-        CreatedById = userId
+        CreatedById = userId,
+        Krs = dto.Krs,
+        Website = dto.Website
     };
 }
