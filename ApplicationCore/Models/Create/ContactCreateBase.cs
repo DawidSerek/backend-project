@@ -17,6 +17,7 @@ public class PersonCreateDto : ContactCreateBase
     public required string Pesel { get; set; }
     public Guid? OrganizationId { get; set; }
     public Guid? EmployerId { get; set; }
+    public string? Position { get; set; }
 }
 
 public class CompanyCreateDto : ContactCreateBase

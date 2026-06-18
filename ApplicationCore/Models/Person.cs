@@ -1,5 +1,5 @@
-using ApplicationCore.ValueObjects.Pesel;
 using ApplicationCore.ValueObjects;
+using ApplicationCore.ValueObjects.Pesel;
 namespace ApplicationCore.Models;
 
 public class Person : Contact
@@ -7,6 +7,7 @@ public class Person : Contact
     public required Pesel PESEL { get; set; }
     public Organization? Organization { get; set; }
     public Company? Employer { get; set; }
+    public Position? Position { get; set; }
 }
 
 public record CreatePersonDto
@@ -16,6 +17,7 @@ public record CreatePersonDto
     public string? PhoneNumber { get; set; }
     public required string Pesel { get; set; }
     public Guid? OrganizationId { get; set; }
+    public string? Position { get; set; }
 }
 
 public record ResultPersonDto
@@ -27,4 +29,5 @@ public record ResultPersonDto
     public DateTime CreatedDate { get; init; }
     public Pesel PESEL { get; init; } = null!;
     public Guid? OrganizationId { get; init; }
+    public string? Position { get; set; }
 }

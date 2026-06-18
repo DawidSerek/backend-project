@@ -10,6 +10,7 @@ public abstract class Contact : EntityBase
     public EmailAddress? Email { get; set; }
     public PhoneNumber? PhoneNumber { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public List<Tag> Tags { get; set; } = [];
 }
 
 public record CreateContactDto
