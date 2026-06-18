@@ -7,30 +7,38 @@ CSV/JSON import, JWT auth with refresh tokens, tag management, and
 Jaro-Winkler fuzzy deduplication.
 
 - **Author:** Dawid Serek
-- **Repository:** https://github.com/dawids-wsei/backend-project
+- **Repository:** https://github.com/DawidSerek/backend-project
 
 ---
 
 ## Table of contents
 
-1. [Tech stack & architecture](#tech-stack--architecture)
-2. [How to run](#how-to-run)
-3. [Authentication](#authentication)
-4. [Implemented functions (task → feature map)](#implemented-functions-task--feature-map)
-5. [Under the hood](#under-the-hood)
-6. [API tour](#api-tour)
-   - [Auth](#auth)
-   - [Contacts (polymorphic)](#contacts-polymorphic)
-   - [Persons](#persons)
-   - [Companies](#companies)
-   - [Organizations](#organizations)
-   - [Interactions](#interactions)
-   - [Tags](#tags)
-   - [Positions](#positions)
-   - [Deduplication](#deduplication)
-   - [Import](#import)
-   - [Admin (users & roles)](#admin-users--roles)
-7. [Testing](#testing)
+- [Backend Project](#backend-project)
+  - [Table of contents](#table-of-contents)
+  - [Tech stack \& architecture](#tech-stack--architecture)
+  - [How to run](#how-to-run)
+  - [Authentication](#authentication)
+  - [Implemented functions (task → feature map)](#implemented-functions-task--feature-map)
+  - [Under the hood](#under-the-hood)
+    - [Value Objects (records + EF converters)](#value-objects-records--ef-converters)
+    - [Validation (testable error paths)](#validation-testable-error-paths)
+    - [Deduplication](#deduplication)
+    - [Ownership rule](#ownership-rule)
+    - [Polymorphic JSON discriminators](#polymorphic-json-discriminators)
+  - [API tour](#api-tour)
+    - [Auth](#auth)
+    - [Contacts (polymorphic)](#contacts-polymorphic)
+    - [Persons](#persons)
+    - [Companies](#companies)
+    - [Organizations](#organizations)
+    - [Interactions](#interactions)
+    - [Tags](#tags)
+    - [Positions](#positions)
+    - [Deduplication](#deduplication-1)
+    - [Import](#import)
+    - [Admin (users \& roles)](#admin-users--roles)
+  - [Notes \& known limitations](#notes--known-limitations)
+  - [Testing](#testing)
 
 ---
 
@@ -52,19 +60,45 @@ and `Infrastructure/Modules/AddJwtModule.cs` (JWT bearer + authorization policie
 
 ## How to run
 
+On a fresh checkout, apply the EF migrations to create the schema at
+`Web/backend-project.db`, then start the API:
+
 ```sh
+dotnet ef database update \
+  --project Infrastructure/Infrastructure.csproj \
+  --startup-project Web/Web.csproj
+
 dotnet run --project Web/Web.csproj
 # API on http://localhost:5041  (HTTPS on https://localhost:7247)
 ```
 
-On first run the DB is created at `Web/backend-project.db` and two seeders run:
+> Migrations are **not** applied automatically at startup — you must run
+> `dotnet ef database update` once (or use the `updatedb` skill in this
+> repo). If you skip it, the app will start but the first DB access will
+> fail with "no such table" because the seeders / endpoints will find an
+> empty SQLite file.
+
+On startup, two seeders run against the existing schema:
 - `IdentitySeeder` — creates roles `Admin`, `User`, `SalesManager`, `Manager`,
   `Guest` and one admin user.
 - `PositionSeeder` — inserts 20 default English position names
   (Developer, Senior Developer, Tech Lead, …).
 
-EF migrations live in `Infrastructure/Migrations/` and are applied
-automatically on startup.
+EF migrations live in `Infrastructure/Migrations/`. To add a new migration
+after a model change:
+
+```sh
+dotnet ef migrations add <Name> \
+  --project Infrastructure/Infrastructure.csproj \
+  --startup-project Web/Web.csproj
+dotnet ef database update \
+  --project Infrastructure/Infrastructure.csproj \
+  --startup-project Web/Web.csproj
+```
+
+> Gotcha: the dev server (`dotnet watch`) holds the DB open; stop it
+> before running `database update` or the command will fail with
+> "database is locked".
 
 ---
 
