@@ -1,6 +1,7 @@
 using ApplicationCore.Mapping;
 using Infrastructure.Modules;
 using Infrastructure.Seed;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +13,12 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 
 builder.Services.RegisterEfModule(builder.Configuration, builder.Environment.ContentRootPath);
 builder.Services.AddJwt(new (builder.Configuration));
+builder.Services.AddFluentValidationAutoValidation();
 
 var app = builder.Build();
 
 await IdentitySeeder.SeedAsync(app.Services);
+await PositionSeeder.SeedAsync(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

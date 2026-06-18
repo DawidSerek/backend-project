@@ -2,6 +2,7 @@ using ApplicationCore.Interfaces.Import;
 using ApplicationCore.Interfaces.Repository;
 using ApplicationCore.Interfaces.Services;
 using ApplicationCore.Interfaces.UnitOfWork;
+using ApplicationCore.Models.Create;
 using ApplicationCore.Services.ContactFactory;
 using ApplicationCore.Services.DeduplicationStrategy;
 using ApplicationCore.Services.Ef.CompanyService;
@@ -10,6 +11,8 @@ using ApplicationCore.Services.Ef.ImportService;
 using ApplicationCore.Services.Ef.InteractionService;
 using ApplicationCore.Services.Ef.OrganizationService;
 using ApplicationCore.Services.Ef.PersonService;
+using ApplicationCore.Services.Validator;
+using FluentValidation;
 using Infrastructure.EntityFramework.Context;
 using Infrastructure.EntityFramework.Repository;
 using Infrastructure.EntityFramework.UnitOfWork;
@@ -39,8 +42,12 @@ public static class EfModule
         services.AddScoped<IInteractionRepository, InteractionRepository>();
         services.AddScoped<IRemovedContactRepository, RemovedContactRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IPositionRepository, PositionRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
 
+        // ********
         // Services
+        // ********
 
         // Contact
         services.AddScoped<IContactService, ContactService>();
@@ -63,7 +70,10 @@ public static class EfModule
         services.AddSingleton<JwtSettings>();
         services.AddScoped<IAuthService, AuthService>();
 
-        // Other services
+        // Validator
+        services.AddScoped<IValidator<PersonCreateDto>, PersonCreateDtoValidator>();
+
+        // Other 
         services.AddScoped<IDeduplicationStrategyService, DeduplicationStrategyService>();
 
         // Add database context and connection string
